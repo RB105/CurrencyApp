@@ -1,7 +1,6 @@
 import 'package:currency/data/model/currency_model.dart';
-import 'package:currency/provider/home_provider.dart';
+import 'package:currency/data/repository/currency_repo.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -13,24 +12,23 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (context) => HomeProvider(),
-      builder: (context, child) {
-        return Scaffold(
+    return Scaffold(
+      appBar: AppBar(title: const Text("Currency"),),
           body: RefreshIndicator(
-            onRefresh: context.read<HomeProvider>().getCurrency,
-            child: Builder(
-              builder: (context) {
-                if (context.watch<HomeProvider>().isLoading) {
+            onRefresh: CurrencyRepository().checkDatabase,
+            child: FutureBuilder(
+              future: CurrencyRepository().checkDatabase(),
+              builder: (context, snapshot)  {
+                if (!snapshot.hasData) {
                   return const Center(
                     child: CircularProgressIndicator(),
                   );
-                } else if (context.watch<HomeProvider>().error.isNotEmpty) {
+                } else if (snapshot.hasError) {
                   return Center(
-                    child: Text(context.watch<HomeProvider>().error),
+                    child: Text(snapshot.error.toString()),
                   );
                 } else {
-                  List<CurrencyModel> data = context.watch<HomeProvider>().data;
+                  List<CurrencyModel> data = snapshot.data as List<CurrencyModel>;
                   return ListView.builder(
                     itemCount: data.length,
                     itemBuilder: (context, index) {
@@ -48,7 +46,5 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
         );
-      },
-    );
   }
 }

@@ -13,7 +13,7 @@ class CurrencyRepository {
   late Isar db;
 
   // returns data according database empty or not
-  Future<dynamic> checkDatabase() async {
+   Future<dynamic> checkDatabase() async {
     db = await openDatabase();
     if (await db.currencyModels.count() == 0) {
       return getCurrency();
